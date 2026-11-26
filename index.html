@@ -1,1 +1,79 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>24 días de recuerdos</title><link rel="stylesheet" href="styles.css"></head><body><main><header><p class="eyebrow">✦ DICIEMBRE ✦</p><h1>24 días de recuerdos</h1><p>Una pequeña historia detrás de cada puerta.</p><button id="login">Iniciar sesión</button><button id="logout" hidden>Cerrar sesión</button><p id="status" role="status"></p></header><section id="days" aria-label="Calendario"></section></main><dialog id="modal"><button id="close" aria-label="Cerrar">×</button><div id="detail"></div></dialog><dialog id="auth"><form id="authForm"><h2>Acceso de colaboradores</h2><label>Correo<input type="email" name="email" required></label><label>Contraseña<input type="password" name="password" required></label><button>Entrar</button><button type="button" id="cancel">Cancelar</button><p id="authError" role="status"></p></form></dialog><script type="module" src="app.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>24 días de nosotros</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="snow" class="snow" aria-hidden="true"></div>
+  <div class="lights" aria-hidden="true"><div id="bulbs"></div></div>
+  <main>
+    <header class="hero">
+      <div class="ornament" aria-hidden="true"><span>✦</span></div>
+      <h1>24 días de nosotros</h1>
+      <p>Un año de historias que merecen ser recordadas.</p>
+    </header>
+
+    <section class="calendar" aria-label="Calendario de Adviento">
+      <div class="calendar-header">
+        <div class="countdown">
+          <p id="countdown-label">Próxima apertura</p>
+          <time id="countdown" aria-labelledby="countdown-label"></time>
+        </div>
+        <div class="calendar-progress">
+          <p id="progress-label">0 de 24 días abiertos</p>
+          <progress id="progress" value="0" max="24" aria-labelledby="progress-label"></progress>
+        </div>
+      </div>
+      <div id="days"></div>
+    </section>
+
+    <footer>
+      <button id="login" type="button" hidden>Iniciar sesión</button>
+      <button id="logout" type="button" hidden>Cerrar sesión</button>
+      <p id="status" role="status"></p>
+    </footer>
+  </main>
+
+  <dialog id="modal" aria-labelledby="memory-heading">
+    <div id="memory-content">
+      <button id="close" class="close-button" type="button" aria-label="Cerrar recuerdo" autofocus>×</button>
+      <h2 id="memory-heading"></h2>
+      <div id="memory-tabs" class="memory-tabs" role="tablist" aria-label="Recuerdo" hidden>
+        <button id="view-tab" type="button" role="tab" aria-controls="detail" aria-selected="false" tabindex="-1">
+          <span class="tab-icon eye-icon" aria-hidden="true"></span>Ver recuerdo
+        </button>
+        <button id="edit-tab" type="button" role="tab" aria-controls="memory-editor" aria-selected="false" tabindex="-1">
+          <span class="tab-icon" aria-hidden="true">✎</span>Editar recuerdo
+        </button>
+      </div>
+      <div id="detail"></div>
+      <div id="memory-editor" role="tabpanel" aria-labelledby="edit-tab" hidden></div>
+    </div>
+  </dialog>
+
+  <dialog id="photo-modal" class="photo-modal" aria-label="Fotografía ampliada">
+    <div id="photo-screen">
+      <button id="close-photo" class="close-button" type="button" aria-label="Cerrar fotografía" autofocus>×</button>
+      <img id="full-photo" alt="">
+    </div>
+  </dialog>
+
+  <dialog id="auth" aria-labelledby="auth-heading">
+    <form id="authForm">
+      <h2 id="auth-heading">Acceso de colaboradores</h2>
+      <label>Correo<input type="email" name="email" autocomplete="username" required></label>
+      <label>Contraseña<input type="password" name="password" autocomplete="current-password" required></label>
+      <div class="form-actions">
+        <button>Entrar</button>
+        <button type="button" id="cancel">Cancelar</button>
+      </div>
+      <p id="authError" role="status"></p>
+    </form>
+  </dialog>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
