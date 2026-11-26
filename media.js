@@ -93,11 +93,8 @@ function loadYouTube() {
   return apiPromise;
 }
 
-// The YouTube embed requirements allow only one automatic player on a page.
-let automaticPlayer;
-
-export function mountYouTubePlayer(container, song, {
-  autoplay = false, loop = false, startAt = 0, canAutoplay = () => true, onReady, onStatus,
+function mountYouTubePlayer(container, song, {
+  autoplay = false, canAutoplay = () => true, onStatus,
 } = {}) {
   const iframe = document.createElement('iframe');
   iframe.title = 'Reproductor de YouTube';
@@ -109,11 +106,6 @@ export function mountYouTubePlayer(container, song, {
     playsinline: '1',
     autoplay: '0',
   });
-  if (loop) {
-    params.set('loop', '1');
-    params.set('playlist', song.id);
-  }
-  if (startAt >= 1) params.set('start', String(Math.floor(startAt)));
   iframe.src = `https://www.youtube.com/embed/${song.id}?${params}`;
   container.append(iframe);
 
@@ -123,9 +115,6 @@ export function mountYouTubePlayer(container, song, {
   let awaitingAutoplay = autoplay && typeof IntersectionObserver === 'function';
   let visible = false;
   let player;
-  let playerStates;
-  let playRequested = false;
-  let pauseRequest;
   let observer;
   let frame;
   let deadline;
@@ -138,45 +127,16 @@ export function mountYouTubePlayer(container, song, {
     frame = undefined;
   }
 
-  function releaseAutoplay() {
-    if (automaticPlayer === iframe) automaticPlayer = undefined;
-  }
-
-  function manualPlayback(release = true) {
+  function manualPlayback() {
     clearTimeout(deadline);
     clearAutomaticPlayback();
-    if (release) releaseAutoplay();
     onStatus?.('manual');
   }
 
   function requestPlayback() {
     clearTimeout(deadline);
-    deadline = setTimeout(() => manualPlayback(false), 4500);
-    playRequested = true;
+    deadline = setTimeout(manualPlayback, 4500);
     player.playVideo();
-  }
-
-  function finishPause(confirmed) {
-    if (!pauseRequest) return;
-    const { timer, resolve } = pauseRequest;
-    pauseRequest = undefined;
-    clearTimeout(timer);
-    resolve(confirmed);
-  }
-
-  function sendPause() {
-    try {
-      const { UNSTARTED, CUED, PAUSED, ENDED } = playerStates;
-      const alreadyStopped = !playRequested &&
-        [UNSTARTED, CUED, PAUSED, ENDED].includes(player.getPlayerState());
-      player.pauseVideo();
-      if (alreadyStopped) {
-        releaseAutoplay();
-        finishPause(true);
-      }
-    } catch {
-      finishPause(false);
-    }
   }
 
   function attemptAutoplay() {
@@ -190,12 +150,7 @@ export function mountYouTubePlayer(container, song, {
       }
       return;
     }
-    if (automaticPlayer && automaticPlayer !== iframe) {
-      manualPlayback();
-      return;
-    }
     clearAutomaticPlayback();
-    automaticPlayer = iframe;
     requestPlayback();
   }
 
@@ -212,25 +167,19 @@ export function mountYouTubePlayer(container, song, {
     if (!active || unavailable) return;
     switch (state) {
       case states.PLAYING:
-        playRequested = false;
         clearTimeout(deadline);
         clearAutomaticPlayback();
         onStatus?.('playing');
         break;
       case states.PAUSED:
-        playRequested = false;
         clearTimeout(deadline);
         clearAutomaticPlayback();
-        releaseAutoplay();
         onStatus?.('paused');
-        finishPause(true);
         break;
       case states.BUFFERING:
         onStatus?.('buffering');
         break;
       case states.ENDED:
-        playRequested = false;
-        if (!loop) releaseAutoplay();
         onStatus?.('ready');
         break;
     }
@@ -241,9 +190,7 @@ export function mountYouTubePlayer(container, song, {
     unavailable = true;
     clearTimeout(deadline);
     clearAutomaticPlayback();
-    releaseAutoplay();
     onStatus?.(status);
-    finishPause(false);
   }
 
   loadYouTube().then((YT) => {
@@ -254,22 +201,15 @@ export function mountYouTubePlayer(container, song, {
           if (!active || unavailable) return;
           ready = true;
           player = event.target;
-          playerStates = YT.PlayerState;
-          onReady?.(player);
           onStatus?.('ready');
           changeState(player.getPlayerState(), YT.PlayerState);
-          if (pauseRequest) sendPause();
           attemptAutoplay();
         },
         onStateChange(event) {
           changeState(event.data, YT.PlayerState);
         },
         onAutoplayBlocked() {
-          if (active && !unavailable) {
-            playRequested = false;
-            manualPlayback();
-            finishPause(true);
-          }
+          if (active && !unavailable) manualPlayback();
         },
         onError() {
           fail('unavailable');
@@ -281,30 +221,14 @@ export function mountYouTubePlayer(container, song, {
   return {
     play() {
       if (!active || unavailable || !ready) return;
-      finishPause(false);
       clearAutomaticPlayback();
-      releaseAutoplay();
       requestPlayback();
-    },
-    pause() {
-      clearTimeout(deadline);
-      clearAutomaticPlayback();
-      if (!active || unavailable) return Promise.resolve(false);
-      if (pauseRequest) return pauseRequest.promise;
-      let resolve;
-      const promise = new Promise((done) => { resolve = done; });
-      const timer = setTimeout(() => finishPause(false), 1200);
-      pauseRequest = { promise, timer, resolve };
-      if (ready) sendPause();
-      return promise;
     },
     destroy() {
       if (!active) return;
       active = false;
       clearTimeout(deadline);
       clearAutomaticPlayback();
-      releaseAutoplay();
-      finishPause(false);
       try {
         if (ready && !unavailable) player.stopVideo();
       } catch {

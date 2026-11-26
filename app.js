@@ -245,7 +245,6 @@ function resetAccount(id) {
   refreshVersion++;
   editor = false;
   banner.setEditor(false);
-  ambient.setEditor(false);
   records = {};
   closeMemory();
   drawDoors();
@@ -277,7 +276,6 @@ async function refresh() {
       closeMemory();
       editor = false;
       banner.setEditor(false);
-      ambient.setEditor(false);
       records = {};
       drawDoors();
     }
@@ -289,7 +287,6 @@ async function refresh() {
     if (error) throw error;
     editor = canEdit;
     banner.setEditor(editor);
-    ambient.setEditor(editor);
     records = Object.fromEntries(data.map((record) => [record.day, record]));
     drawDoors();
     $('status').textContent = session && !editor ? 'Esta cuenta no tiene permiso de edición.' : '';

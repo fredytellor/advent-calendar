@@ -58,8 +58,57 @@ main {
 }
 
 .hero {
+  position: relative;
   text-align: center;
   margin-bottom: clamp(1.5rem, 4vw, 2.4rem);
+}
+
+.ambient-sound {
+  position: absolute;
+  inset: -.45rem 0 auto auto;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  background: transparent;
+  color: var(--gold);
+}
+
+.ambient-sound:hover:not(:disabled), .ambient-sound:focus-visible { background: #e3c38a16; }
+
+.ambient-sound-icon {
+  position: relative;
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.ambient-sound-icon::before, .ambient-sound-icon::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+}
+
+.ambient-sound-icon::before {
+  inset: .15rem auto .15rem 0;
+  width: .68rem;
+  clip-path: polygon(0 32%, 35% 32%, 100% 0, 100% 100%, 35% 68%, 0 68%);
+}
+
+.ambient-sound-icon::after {
+  inset: .44rem 0 .44rem auto;
+  width: .52rem;
+  clip-path: polygon(14% 0, 50% 36%, 86% 0, 100% 14%, 64% 50%, 100% 86%,
+    86% 100%, 50% 64%, 14% 100%, 0 86%, 36% 50%, 0 14%);
+}
+
+.ambient-sound.is-playing .ambient-sound-icon::after {
+  inset: .18rem 0 .18rem auto;
+  width: .55rem;
+  border-right: 2px solid;
+  border-radius: 50%;
+  background: transparent;
+  clip-path: none;
 }
 
 .hero h1 {
@@ -621,113 +670,6 @@ dialog h2 {
 .music a { color: #633d22; text-underline-offset: .18em; }
 .music-actions { margin-top: .5rem; }
 .music p:empty, .form-status:empty { display: none; }
-
-.ambient-widget {
-  --music-right: max(.9rem, env(safe-area-inset-right, 0px));
-  --music-left: max(.9rem, env(safe-area-inset-left, 0px));
-  --music-bottom: max(.9rem, env(safe-area-inset-bottom, 0px));
-  --music-gap: .6rem;
-  position: fixed;
-  z-index: 3;
-  right: var(--music-right);
-  bottom: var(--music-bottom);
-}
-
-.ambient-fab {
-  display: grid;
-  width: 3.5rem;
-  height: 3.5rem;
-  place-items: center;
-  padding: 0;
-  border-color: #e3c38a90;
-  border-radius: 50%;
-  background: var(--forest);
-  color: var(--gold);
-  font-size: 1.55rem;
-  line-height: 1;
-  box-shadow: 0 3px 12px #081b1470;
-}
-
-.ambient-panel {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + var(--music-gap));
-  width: min(21rem, calc(100vw - var(--music-left) - var(--music-right)));
-  max-height: max(0px, calc(100dvh - var(--music-bottom) - 3.5rem - var(--music-gap)
-    - max(.6rem, env(safe-area-inset-top, 0px))));
-  overflow: auto;
-  overscroll-behavior: contain;
-  padding: .65rem;
-  border: 1px solid #e3c38a80;
-  border-radius: .65rem;
-  background: #102f25;
-  box-shadow: 0 5px 17px #081b1480;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(.4rem) scale(.98);
-  transform-origin: bottom right;
-  transition: opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
-}
-
-.ambient-panel.is-open {
-  visibility: visible;
-  opacity: 1;
-  transform: none;
-  transition-delay: 0s;
-}
-
-.ambient-panel h2 { margin: 0 0 .5rem; color: var(--gold); font-size: 1rem; font-weight: 400; }
-
-.ambient-actions, .ambient-feedback {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: .3rem .4rem;
-}
-
-.ambient-panel button {
-  min-height: 1.95rem;
-  padding: .2rem .4rem;
-  border-color: #e3c38a52;
-  font-size: .78rem;
-  line-height: 1.15;
-}
-
-.ambient-volume {
-  display: flex;
-  align-items: center;
-  gap: .25rem;
-  min-height: 1.95rem;
-  margin: 0;
-  color: var(--cream);
-  font-size: .76rem;
-}
-
-.ambient-volume input {
-  width: 3.4rem;
-  height: 1.4rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  accent-color: var(--gold);
-}
-
-.ambient-feedback { margin: .4rem 0; }
-
-.ambient-status, .ambient-source {
-  margin: 0;
-  color: var(--gold);
-  font: .75rem/1.25 system-ui, sans-serif;
-}
-
-.ambient-player iframe {
-  display: block;
-  width: 100%;
-  min-height: 200px;
-  aspect-ratio: 16 / 9;
-  border: 0;
-  background: #131a16;
-}
 
 fieldset { padding: 0; margin: 0; border: 0; min-inline-size: 0; }
 label { display: block; margin: 1rem 0; }
