@@ -1,0 +1,13 @@
+create table public.editors (id uuid primary key references auth.users(id) on delete cascade);
+alter table public.editors enable row level security;
+create policy own_editor on public.editors for select to authenticated using (id = auth.uid());
+create table public.memories (day integer primary key check(day between 1 and 24), title text not null, description text not null, photo text);
+alter table public.memories enable row level security;
+create function public.is_editor() returns boolean language sql stable security invoker set search_path = '' as $$ select exists(select 1 from public.editors where id=auth.uid()) $$;
+create function public.unlocked(d integer) returns boolean language sql stable set search_path = '' as $$ select (now() at time zone 'America/Bogota')::date >= make_date(2026,12,d) $$;
+create policy read_memories on public.memories for select using (public.unlocked(day) or public.is_editor());
+create policy insert_memories on public.memories for insert to authenticated with check(public.is_editor());
+create policy update_memories on public.memories for update to authenticated using(public.is_editor()) with check(public.is_editor());
+insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values ('memories','memories',false,5242880,array['image/jpeg','image/png','image/webp']);
+create policy read_photos on storage.objects for select using(bucket_id='memories' and (public.is_editor() or exists(select 1 from public.memories m where m.photo=name and public.unlocked(m.day))));
+create policy upload_photos on storage.objects for insert to authenticated with check(bucket_id='memories' and public.is_editor());
