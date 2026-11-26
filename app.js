@@ -1,9 +1,13 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { URL as projectUrl, KEY, YEAR } from './config.js';
 import { compressPhoto, MAX_PHOTOS, memoryPhotos, mountSong, parseSong, PHOTO_TYPES } from './media.js';
+import { createBanner } from './banner.js';
+import { createAmbientMusic } from './ambient-music.js';
 
 const $ = (id) => document.getElementById(id);
 const db = createClient(projectUrl, KEY);
+const banner = createBanner(db);
+const ambient = createAmbientMusic(db);
 const storage = db.storage.from('memories');
 const cardStorage = db.storage.from('calendar-cards');
 const modal = $('modal');
@@ -240,6 +244,8 @@ function resetAccount(id) {
   accountId = id;
   refreshVersion++;
   editor = false;
+  banner.setEditor(false);
+  ambient.setEditor(false);
   records = {};
   closeMemory();
   drawDoors();
@@ -270,6 +276,8 @@ async function refresh() {
     if (editor && !canEdit) {
       closeMemory();
       editor = false;
+      banner.setEditor(false);
+      ambient.setEditor(false);
       records = {};
       drawDoors();
     }
@@ -280,6 +288,8 @@ async function refresh() {
     if (version !== refreshVersion) return;
     if (error) throw error;
     editor = canEdit;
+    banner.setEditor(editor);
+    ambient.setEditor(editor);
     records = Object.fromEntries(data.map((record) => [record.day, record]));
     drawDoors();
     $('status').textContent = session && !editor ? 'Esta cuenta no tiene permiso de edición.' : '';
@@ -475,7 +485,7 @@ function renderMemory(current) {
       const music = node('section', '', 'music');
       music.append(node('h3', 'Canción del recuerdo'));
       detail.append(music);
-      let stopSong = mountSong(music, song, true);
+      let stopSong = mountSong(music, song, true, () => Number(getComputedStyle(memoryContent).opacity) >= 0.5);
       current.stopSong = (preserveLayout = false) => {
         if (!stopSong) return;
         const frame = preserveLayout && music.querySelector('iframe:not([hidden])');
@@ -1078,6 +1088,8 @@ updateClock();
 drawDoors();
 refresh();
 refreshCards();
+banner.refresh();
+ambient.refresh();
 setInterval(() => {
   if (updateClock()) {
     drawDoors();
@@ -1087,4 +1099,6 @@ setInterval(() => {
 setInterval(() => {
   refresh();
   refreshCards();
+  banner.refresh();
+  ambient.refresh();
 }, 60000);

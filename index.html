@@ -11,13 +11,13 @@
   <div id="snow" class="snow" aria-hidden="true"></div>
   <div class="lights" aria-hidden="true"><div id="bulbs"></div></div>
   <main>
-    <header class="hero">
+    <header class="hero page-content">
       <div class="ornament" aria-hidden="true"><span>✦</span></div>
       <h1>24 días de nosotros</h1>
       <p>Un año de historias que merecen ser recordadas.</p>
     </header>
 
-    <section class="calendar" aria-label="Calendario de Adviento">
+    <section class="calendar page-content" aria-label="Calendario de Adviento">
       <div class="calendar-header">
         <div class="countdown">
           <p id="countdown-label">Próxima apertura</p>
@@ -31,12 +31,44 @@
       <div id="days"></div>
     </section>
 
-    <footer>
+    <section class="group-banner" aria-labelledby="group-banner-title">
+      <div id="group-banner-frame" class="banner-frame">
+        <button id="edit-banner" class="banner-edit" type="button" hidden>Editar banner</button>
+      </div>
+      <div class="page-content">
+        <h2 id="group-banner-title">Por muchos recuerdos más</h2>
+        <p>Que nunca nos falten motivos para celebrar juntos.</p>
+      </div>
+    </section>
+
+    <footer class="page-content">
       <button id="login" type="button" hidden>Iniciar sesión</button>
       <button id="logout" type="button" hidden>Cerrar sesión</button>
+      <button id="configure-ambient" type="button" hidden>Configurar música ambiental</button>
       <p id="status" role="status"></p>
     </footer>
   </main>
+
+  <aside id="ambient-widget" class="ambient-widget" aria-label="Música ambiental" hidden>
+    <button id="ambient-toggle" class="ambient-fab" type="button" aria-label="Música ambiental"
+      aria-expanded="false" aria-controls="ambient-panel"><span aria-hidden="true">♪</span></button>
+    <section id="ambient-panel" class="ambient-panel" aria-labelledby="ambient-title" inert>
+      <h2 id="ambient-title">Música ambiental</h2>
+      <div class="ambient-actions">
+        <button id="ambient-play" type="button" disabled>Reproducir música</button>
+        <button id="ambient-mute" type="button" disabled>Silenciar</button>
+        <label class="ambient-volume">
+          <span>Volumen</span>
+          <input id="ambient-volume" type="range" min="0" max="100" value="25" disabled>
+        </label>
+      </div>
+      <div class="ambient-feedback">
+        <p id="ambient-status" class="ambient-status" role="status"></p>
+        <a id="ambient-source" class="ambient-source" target="_blank" rel="noopener noreferrer" hidden>Abrir en YouTube</a>
+      </div>
+      <div id="ambient-player" class="ambient-player"></div>
+    </section>
+  </aside>
 
   <dialog id="modal" aria-labelledby="memory-heading">
     <div id="memory-content">
@@ -53,6 +85,43 @@
       <div id="detail"></div>
       <div id="memory-editor" role="tabpanel" aria-labelledby="edit-tab" hidden></div>
     </div>
+  </dialog>
+
+  <dialog id="banner-dialog" aria-labelledby="banner-dialog-title">
+    <form id="banner-form">
+      <h2 id="banner-dialog-title">Editar banner</h2>
+      <p>La fotografía será visible para todas las personas que visiten el calendario.</p>
+      <div class="banner-frame">
+        <img id="banner-preview" class="banner-image" alt="Vista previa de la foto del banner" hidden>
+      </div>
+      <label>Seleccionar foto
+        <input id="banner-picker" type="file" accept="image/jpeg,image/png,image/webp" disabled>
+      </label>
+      <div class="form-actions">
+        <button id="save-banner" type="submit" disabled>Guardar banner</button>
+        <button id="remove-banner" type="button" hidden>Quitar foto</button>
+        <button id="cancel-banner" type="button">Cancelar</button>
+      </div>
+      <progress id="banner-progress" max="100" aria-label="Progreso de la foto del banner" hidden></progress>
+      <p id="banner-status" class="form-status" role="status"></p>
+    </form>
+  </dialog>
+
+  <dialog id="ambient-dialog" aria-labelledby="ambient-dialog-title">
+    <form id="ambient-form">
+      <h2 id="ambient-dialog-title">Configurar música ambiental</h2>
+      <label>Enlace de YouTube o YouTube Music
+        <input id="ambient-url" type="text" inputmode="url" autocomplete="off" autofocus>
+      </label>
+      <div class="form-actions">
+        <button id="ambient-preview" type="button">Vista previa</button>
+        <button id="ambient-save" type="submit">Guardar</button>
+        <button id="ambient-remove" type="button" hidden>Quitar canción</button>
+        <button id="ambient-cancel" type="button">Cancelar</button>
+      </div>
+      <p id="ambient-config-status" class="form-status" role="status"></p>
+      <div id="ambient-preview-player" class="music" hidden></div>
+    </form>
   </dialog>
 
   <dialog id="photo-modal" class="photo-modal" aria-label="Fotografía ampliada">
